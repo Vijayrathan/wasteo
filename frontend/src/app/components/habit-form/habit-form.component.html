@@ -1,0 +1,160 @@
+<div class="habit-form-container">
+  <div class="habit-form-header">
+    <h1>
+      <i class="fas fa-leaf"></i>
+      {{ isEditMode ? "Edit Habit" : "Add New Habit" }}
+    </h1>
+    <p>
+      {{
+        isEditMode
+          ? "Update your sustainable habit details"
+          : "Track a new eco-friendly habit"
+      }}
+    </p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p>Loading habit data...</p>
+  </div>
+
+  <!-- Form -->
+  <div *ngIf="!loading" class="habit-form-card">
+    <form [formGroup]="habitForm" (ngSubmit)="onSubmit()">
+      <!-- Description -->
+      <div class="mb-3">
+        <label for="description" class="form-label">Habit Description</label>
+        <input
+          type="text"
+          id="description"
+          formControlName="description"
+          class="form-control"
+          [ngClass]="{
+            'is-invalid':
+              habitForm.get('description')?.touched &&
+              habitForm.get('description')?.invalid
+          }"
+          placeholder="Describe your sustainable habit"
+        />
+        <div
+          *ngIf="
+            habitForm.get('description')?.touched &&
+            habitForm.get('description')?.invalid
+          "
+          class="invalid-feedback"
+        >
+          <div *ngIf="habitForm.get('description')?.errors?.['required']">
+            Description is required
+          </div>
+        </div>
+      </div>
+
+      <!-- Category -->
+      <div class="mb-3">
+        <label for="category" class="form-label">Category</label>
+        <select
+          id="category"
+          formControlName="category"
+          class="form-select"
+          [ngClass]="{
+            'is-invalid':
+              habitForm.get('category')?.touched &&
+              habitForm.get('category')?.invalid
+          }"
+        >
+          <option value="" disabled>Select a category</option>
+          <option *ngFor="let category of categories" [value]="category">
+            {{ category }}
+          </option>
+        </select>
+        <div
+          *ngIf="
+            habitForm.get('category')?.touched &&
+            habitForm.get('category')?.invalid
+          "
+          class="invalid-feedback"
+        >
+          <div *ngIf="habitForm.get('category')?.errors?.['required']">
+            Category is required
+          </div>
+        </div>
+      </div>
+
+      <!-- Environmental Impact -->
+      <div class="mb-3">
+        <label for="impact" class="form-label"
+          >Environmental Impact (kg CO₂ saved)</label
+        >
+        <input
+          type="number"
+          id="impact"
+          formControlName="impact"
+          class="form-control"
+          [ngClass]="{
+            'is-invalid':
+              habitForm.get('impact')?.touched &&
+              habitForm.get('impact')?.invalid
+          }"
+          min="0"
+          step="0.1"
+        />
+        <div
+          *ngIf="
+            habitForm.get('impact')?.touched && habitForm.get('impact')?.invalid
+          "
+          class="invalid-feedback"
+        >
+          <div *ngIf="habitForm.get('impact')?.errors?.['required']">
+            Impact value is required
+          </div>
+          <div *ngIf="habitForm.get('impact')?.errors?.['min']">
+            Impact value must be positive
+          </div>
+        </div>
+        <div class="form-text">
+          Estimate the carbon footprint reduction from this habit
+        </div>
+      </div>
+
+      <!-- Frequency -->
+      <div class="mb-3">
+        <label for="frequency" class="form-label">Frequency</label>
+        <select
+          id="frequency"
+          formControlName="frequency"
+          class="form-select"
+          [ngClass]="{
+            'is-invalid':
+              habitForm.get('frequency')?.touched &&
+              habitForm.get('frequency')?.invalid
+          }"
+        >
+          <option *ngFor="let frequency of frequencies" [value]="frequency">
+            {{ frequency.charAt(0).toUpperCase() + frequency.slice(1) }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="habit-form-actions">
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          (click)="cancel()"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="habitForm.invalid"
+        >
+          {{ isEditMode ? "Update Habit" : "Save Habit" }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
