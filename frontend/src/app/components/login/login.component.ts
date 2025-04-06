@@ -2,6 +2,7 @@ import { Component } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { UserService } from "../../services/user.service";
+import { HabitRefreshService } from "../../services/habit-refresh.service";
 
 @Component({
   selector: "app-login",
@@ -16,7 +17,8 @@ export class LoginComponent {
   constructor(
     private fb: FormBuilder,
     private userService: UserService,
-    private router: Router
+    private router: Router,
+    private habitRefreshService: HabitRefreshService
   ) {
     this.loginForm = this.fb.group({
       email: ["", [Validators.required, Validators.email]],
@@ -32,6 +34,7 @@ export class LoginComponent {
 
     this.userService.login(this.loginForm.value).subscribe({
       next: (response) => {
+        this.habitRefreshService.triggerRefresh();
         this.router.navigate(["/dashboard"]);
       },
       error: (error) => {

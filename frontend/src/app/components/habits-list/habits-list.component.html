@@ -83,7 +83,7 @@
         <p class="habit-description">{{ habit.description }}</p>
         <div class="habit-impact">
           <i class="fas fa-leaf"></i>
-          <span>Impact: {{ habit.impact }} kg CO₂ saved</span>
+          <span>Impact: {{ habit.carbonFootprint }} kg CO₂ saved</span>
         </div>
       </div>
 
@@ -103,12 +103,14 @@
             Complete
           </button>
           <button
+            *ngIf="habit._id"
             (click)="editHabit(habit._id)"
             class="btn btn-sm btn-outline-secondary"
           >
             <i class="fas fa-edit"></i>
           </button>
           <button
+            *ngIf="habit._id"
             (click)="deleteHabit(habit._id)"
             class="btn btn-sm btn-outline-danger"
           >

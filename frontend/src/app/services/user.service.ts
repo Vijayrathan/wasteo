@@ -113,7 +113,11 @@ export class UserService {
   logout(): void {
     localStorage.removeItem("token");
     localStorage.removeItem("currentUser");
+    // This ensures a null value is set to trigger storage event listeners
+    localStorage.setItem("currentUser", "");
+    localStorage.removeItem("currentUser");
     this.currentUserSubject.next(null);
+    console.log("UserService: User logged out and storage cleared");
   }
 
   // Check if user is logged in
