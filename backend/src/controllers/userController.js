@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const jwt = require("jsonwebtoken");
 
 // Get all users (admin only)
 exports.getAllUsers = async (req, res) => {
@@ -84,11 +85,22 @@ exports.loginUser = async (req, res) => {
     user.lastActive = Date.now();
     await user.save();
 
+    // Generate JWT token
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '24h' }
+    );
+
     // Don't return password
     const userResponse = { ...user.toObject() };
     delete userResponse.password;
 
-    res.status(200).json(userResponse);
+    // Send both user data and token
+    res.status(200).json({
+      user: userResponse,
+      token
+    });
   } catch (error) {
     console.error("Error logging in user:", error);
     res.status(500).json({ message: "Server error" });

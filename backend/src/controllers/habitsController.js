@@ -11,6 +11,65 @@ exports.getUserHabits = async (req, res) => {
     }
 
     const habits = await Habit.find({ user: userId }).sort({ date: -1 });
+    
+    // If user has no habits, return mock habits
+    if (habits.length === 0) {
+      const mockHabits = [
+        {
+          user: userId,
+          date: new Date(),
+          category: "transport",
+          description: "Use public transportation instead of driving",
+          carbonFootprint: 2.5,
+          sustainableAlternative: "Bus or train",
+          pointsEarned: 0,
+          isCompleted: false
+        },
+        {
+          user: userId,
+          date: new Date(),
+          category: "energy",
+          description: "Turn off lights when leaving a room",
+          carbonFootprint: 0.5,
+          sustainableAlternative: "LED bulbs and motion sensors",
+          pointsEarned: 0,
+          isCompleted: false
+        },
+        {
+          user: userId,
+          date: new Date(),
+          category: "diet",
+          description: "Reduce meat consumption",
+          carbonFootprint: 3.0,
+          sustainableAlternative: "Plant-based alternatives",
+          pointsEarned: 0,
+          isCompleted: false
+        },
+        {
+          user: userId,
+          date: new Date(),
+          category: "waste",
+          description: "Recycle paper and plastic",
+          carbonFootprint: 1.0,
+          sustainableAlternative: "Composting organic waste",
+          pointsEarned: 0,
+          isCompleted: false
+        },
+        {
+          user: userId,
+          date: new Date(),
+          category: "water",
+          description: "Take shorter showers",
+          carbonFootprint: 0.8,
+          sustainableAlternative: "Water-saving showerhead",
+          pointsEarned: 0,
+          isCompleted: false
+        }
+      ];
+      
+      return res.status(200).json(mockHabits);
+    }
+    
     res.status(200).json(habits);
   } catch (error) {
     console.error("Error getting user habits:", error);

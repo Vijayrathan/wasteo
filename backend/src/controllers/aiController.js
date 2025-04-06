@@ -71,7 +71,17 @@ exports.chatWithAI = async (req, res) => {
 
     // Create a chat session
     const geminiChat = model.startChat({
-      history: [systemPrompt, ...chatHistory.slice(0, -1)], // Include all but the latest message
+      history:
+        chatHistory.slice(0, -1).length > 0
+          ? [...chatHistory.slice(0, -1)]
+          : [
+              {
+                role: "user",
+                parts: [
+                  { text: "Hello, I'd like some sustainability advice." },
+                ],
+              },
+            ],
       generationConfig: {
         temperature: 0.7,
         topK: 40,
@@ -80,8 +90,19 @@ exports.chatWithAI = async (req, res) => {
       },
     });
 
-    // Generate response from Gemini
-    const result = await geminiChat.sendMessage(message);
+    // Add system context to the first message
+    const userContext = `User context: Name: ${user.firstName || "there"}. 
+    Sustainability score: ${user.sustainabilityScore}/100. 
+    Green points: ${user.greenPoints}. 
+    Preferences: Diet: ${user.goalPreferences?.diet || "standard"}, 
+    Transport: ${user.goalPreferences?.transport || "car"}, 
+    Energy: ${user.goalPreferences?.energyUse || "standard"}, 
+    Waste: ${user.goalPreferences?.wasteManagement || "standard"}.
+    Badges: ${user.badges?.join(", ") || "none yet"}.`;
+
+    // Generate response from Gemini with system context
+    const enhancedMessage = `${userContext}\n\nUser message: ${message} ${systemPrompt}`;
+    const result = await geminiChat.sendMessage(enhancedMessage);
     const aiResponse = result.response.text();
 
     // Add AI response to chat

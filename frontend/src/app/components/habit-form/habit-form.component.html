@@ -67,7 +67,7 @@
         >
           <option value="" disabled>Select a category</option>
           <option *ngFor="let category of categories" [value]="category">
-            {{ category }}
+            {{ category.charAt(0).toUpperCase() + category.slice(1) }}
           </option>
         </select>
         <div
@@ -83,35 +83,36 @@
         </div>
       </div>
 
-      <!-- Environmental Impact -->
+      <!-- Carbon Footprint -->
       <div class="mb-3">
-        <label for="impact" class="form-label"
-          >Environmental Impact (kg CO₂ saved)</label
+        <label for="carbonFootprint" class="form-label"
+          >Carbon Footprint Reduction (kg CO₂)</label
         >
         <input
           type="number"
-          id="impact"
-          formControlName="impact"
+          id="carbonFootprint"
+          formControlName="carbonFootprint"
           class="form-control"
           [ngClass]="{
             'is-invalid':
-              habitForm.get('impact')?.touched &&
-              habitForm.get('impact')?.invalid
+              habitForm.get('carbonFootprint')?.touched &&
+              habitForm.get('carbonFootprint')?.invalid
           }"
           min="0"
           step="0.1"
         />
         <div
           *ngIf="
-            habitForm.get('impact')?.touched && habitForm.get('impact')?.invalid
+            habitForm.get('carbonFootprint')?.touched && 
+            habitForm.get('carbonFootprint')?.invalid
           "
           class="invalid-feedback"
         >
-          <div *ngIf="habitForm.get('impact')?.errors?.['required']">
-            Impact value is required
+          <div *ngIf="habitForm.get('carbonFootprint')?.errors?.['required']">
+            Carbon footprint value is required
           </div>
-          <div *ngIf="habitForm.get('impact')?.errors?.['min']">
-            Impact value must be positive
+          <div *ngIf="habitForm.get('carbonFootprint')?.errors?.['min']">
+            Carbon footprint value must be positive
           </div>
         </div>
         <div class="form-text">
@@ -119,23 +120,16 @@
         </div>
       </div>
 
-      <!-- Frequency -->
+      <!-- Sustainable Alternative -->
       <div class="mb-3">
-        <label for="frequency" class="form-label">Frequency</label>
-        <select
-          id="frequency"
-          formControlName="frequency"
-          class="form-select"
-          [ngClass]="{
-            'is-invalid':
-              habitForm.get('frequency')?.touched &&
-              habitForm.get('frequency')?.invalid
-          }"
-        >
-          <option *ngFor="let frequency of frequencies" [value]="frequency">
-            {{ frequency.charAt(0).toUpperCase() + frequency.slice(1) }}
-          </option>
-        </select>
+        <label for="sustainableAlternative" class="form-label">Sustainable Alternative</label>
+        <input
+          type="text"
+          id="sustainableAlternative"
+          formControlName="sustainableAlternative"
+          class="form-control"
+          placeholder="Describe a sustainable alternative (optional)"
+        />
       </div>
 
       <!-- Form Actions -->

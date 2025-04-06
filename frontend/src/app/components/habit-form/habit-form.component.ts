@@ -1,6 +1,9 @@
 import { Component, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Router, ActivatedRoute } from "@angular/router";
+import { HabitService } from "../../services/habit.service";
+import { AuthService } from "../../services/auth.service";
+import { HabitCategory } from "../../models/habit.model";
 
 @Component({
   selector: "app-habit-form",
@@ -12,27 +15,33 @@ export class HabitFormComponent implements OnInit {
   isEditMode: boolean = false;
   habitId: string | null = null;
   loading: boolean = false;
-  categories: string[] = [
-    "Transportation",
-    "Food",
-    "Energy",
-    "Waste",
-    "Water",
-    "Shopping",
+  categories: HabitCategory[] = [
+    "transport",
+    "energy",
+    "diet",
+    "waste",
+    "water",
+    "other"
   ];
-  frequencies: string[] = ["daily", "weekly", "monthly", "one-time"];
 
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private habitService: HabitService,
+    private authService: AuthService
   ) {
     this.habitForm = this.formBuilder.group({
       description: ["", [Validators.required]],
       category: ["", [Validators.required]],
-      impact: [1, [Validators.required, Validators.min(0)]],
-      frequency: ["daily", [Validators.required]],
+      carbonFootprint: [1, [Validators.required, Validators.min(0)]],
+      sustainableAlternative: [""],
     });
+
+    // For development/testing, set a mock user if none exists
+    if (!this.authService.currentUserValue) {
+      this.authService.setMockUser();
+    }
   }
 
   ngOnInit(): void {
@@ -45,33 +54,24 @@ export class HabitFormComponent implements OnInit {
     }
   }
 
-  // In a real app, this would fetch data from an API
   loadHabitData(id: string): void {
     this.loading = true;
-
-    // Mock data for demo - in a real app this would be an API call
-    setTimeout(() => {
-      // Find the habit in our mock data based on ID
-      const habit = {
-        _id: id,
-        description: "Used public transportation instead of driving",
-        category: "Transportation",
-        impact: 3.2,
-        frequency: "daily",
-        isCompleted: false,
-        date: new Date(),
-      };
-
-      // Patch the form with the habit data
-      this.habitForm.patchValue({
-        description: habit.description,
-        category: habit.category,
-        impact: habit.impact,
-        frequency: habit.frequency,
-      });
-
-      this.loading = false;
-    }, 1000);
+    this.habitService.getHabitById(id).subscribe({
+      next: (habit) => {
+        this.habitForm.patchValue({
+          description: habit.description,
+          category: habit.category,
+          carbonFootprint: habit.carbonFootprint,
+          sustainableAlternative: habit.sustainableAlternative,
+        });
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error("Error loading habit:", error);
+        this.loading = false;
+        // Handle error appropriately
+      },
+    });
   }
 
   onSubmit(): void {
@@ -79,25 +79,50 @@ export class HabitFormComponent implements OnInit {
       return;
     }
 
+    const currentUser = this.authService.currentUserValue;
+    if (!currentUser) {
+      console.error('No user logged in');
+      // Handle the error appropriately (e.g., redirect to login)
+      return;
+    }
+
+    this.loading = true;
     const habitData = this.habitForm.value;
 
-    // Add current date and completed status
+    // Add required fields for new habit
     const completeHabitData = {
       ...habitData,
       date: new Date(),
       isCompleted: false,
+      pointsEarned: 0,
+      userId: currentUser._id, // Use the actual user ID from auth service
     };
 
-    if (this.isEditMode) {
-      // In a real app, this would update the habit in the backend
-      console.log("Updating habit:", completeHabitData);
+    if (this.isEditMode && this.habitId) {
+      this.habitService.updateHabit(this.habitId, completeHabitData).subscribe({
+        next: () => {
+          this.loading = false;
+          this.router.navigate(["/habits"]);
+        },
+        error: (error) => {
+          console.error("Error updating habit:", error);
+          this.loading = false;
+          // Handle error appropriately
+        },
+      });
     } else {
-      // In a real app, this would create a new habit in the backend
-      console.log("Creating new habit:", completeHabitData);
+      this.habitService.createHabit(completeHabitData).subscribe({
+        next: () => {
+          this.loading = false;
+          this.router.navigate(["/habits"]);
+        },
+        error: (error) => {
+          console.error("Error creating habit:", error);
+          this.loading = false;
+          // Handle error appropriately
+        },
+      });
     }
-
-    // Navigate back to habits list
-    this.router.navigate(["/habits"]);
   }
 
   cancel(): void {

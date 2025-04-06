@@ -15,16 +15,16 @@
       *ngFor="let message of messages"
       class="message"
       [ngClass]="{
-        'user-message': message.sender === 'user',
-        'ai-message': message.sender === 'ai'
+        'user-message': message.role === 'user',
+        'ai-message': message.role === 'ai'
       }"
     >
       <div class="message-content">
         <div class="message-sender">
-          <i *ngIf="message.sender === 'ai'" class="fas fa-robot"></i>
-          <i *ngIf="message.sender === 'user'" class="fas fa-user"></i>
+          <i *ngIf="message.role === 'ai'" class="fas fa-robot"></i>
+          <i *ngIf="message.role === 'user'" class="fas fa-user"></i>
           <span>{{
-            message.sender === "user" ? userName || "You" : "EcoWise AI"
+            message.role === "user" ? userName || "You" : "EcoWise AI"
           }}</span>
           <span class="timestamp">{{
             message.timestamp | date : "shortTime"

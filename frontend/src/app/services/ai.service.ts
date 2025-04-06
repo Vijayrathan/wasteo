@@ -9,7 +9,7 @@ import { HabitCategory } from "../models/habit.model";
   providedIn: "root",
 })
 export class AiService {
-  private apiUrl = `${environment.apiUrl}/ai`;
+  private apiUrl = `${environment.apiUrl}/api/ai`;
 
   constructor(private http: HttpClient) {}
 

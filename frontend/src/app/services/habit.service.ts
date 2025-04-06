@@ -13,7 +13,7 @@ import { environment } from "../../environments/environment";
   providedIn: "root",
 })
 export class HabitService {
-  private apiUrl = `${environment.apiUrl}/habits`;
+  private apiUrl = `${environment.apiUrl}/api/habits`;
 
   constructor(private http: HttpClient) {}
 

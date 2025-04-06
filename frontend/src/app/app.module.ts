@@ -14,6 +14,8 @@ import { NavbarComponent } from "./components/navbar/navbar.component";
 import { HabitsListComponent } from "./components/habits-list/habits-list.component";
 import { HabitFormComponent } from "./components/habit-form/habit-form.component";
 import { FootprintCalculatorComponent } from "./components/footprint-calculator/footprint-calculator.component";
+import { HabitService } from './services/habit.service';
+import { AuthService } from './services/auth.service';
 
 // Import auth interceptor
 import { AuthInterceptor } from "./interceptors/auth.interceptor";
@@ -45,6 +47,8 @@ import { AuthInterceptor } from "./interceptors/auth.interceptor";
       useClass: AuthInterceptor,
       multi: true,
     },
+    HabitService,
+    AuthService
   ],
   bootstrap: [AppComponent],
 })

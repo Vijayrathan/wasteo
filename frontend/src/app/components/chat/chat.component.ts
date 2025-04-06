@@ -2,12 +2,7 @@ import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { UserService } from "../../services/user.service";
 import { ChatService } from "../../services/chat.service";
-
-interface ChatMessage {
-  content: string;
-  sender: "user" | "ai";
-  timestamp: Date;
-}
+import { ChatMessage } from "../../models/chat.model";
 
 @Component({
   selector: "app-chat",
@@ -63,8 +58,8 @@ export class ChatComponent implements OnInit {
           // Add previous messages to chat
           history.forEach((msg) => {
             this.messages.push({
+              role: msg.role,
               content: msg.content,
-              sender: msg.sender as "user" | "ai",
               timestamp: new Date(msg.timestamp),
             });
           });
@@ -98,7 +93,7 @@ export class ChatComponent implements OnInit {
     this.loading = true;
     this.chatService.sendMessage(userMessage).subscribe({
       next: (response) => {
-        this.addMessage(response.reply, "ai");
+        this.addMessage(response.message, "ai");
         this.loading = false;
       },
       error: (error) => {
@@ -112,10 +107,10 @@ export class ChatComponent implements OnInit {
     });
   }
 
-  addMessage(content: string, sender: "user" | "ai"): void {
+  addMessage(content: string, role: "user" | "ai"): void {
     const message: ChatMessage = {
       content,
-      sender,
+      role,
       timestamp: new Date(),
     };
 
