@@ -2,6 +2,7 @@ const { getGeminiModel } = require("../config/gemini");
 const Chat = require("../models/Chat");
 const User = require("../models/User");
 const Habit = require("../models/Habit");
+const { marked } = require('marked');
 
 // Chat with AI
 exports.chatWithAI = async (req, res) => {
@@ -103,7 +104,9 @@ exports.chatWithAI = async (req, res) => {
     // Generate response from Gemini with system context
     const enhancedMessage = `${userContext}\n\nUser message: ${message} ${systemPrompt}`;
     const result = await geminiChat.sendMessage(enhancedMessage);
-    const aiResponse = result.response.text();
+    const resp = result.response.text();
+    const aiResponse = marked(resp);
+
 
     // Add AI response to chat
     chat.messages.push({
@@ -286,7 +289,8 @@ exports.getSuggestions = async (req, res) => {
     // Get response from Gemini
     const model = getGeminiModel();
     const result = await model.generateContent(suggestionPrompt);
-    const suggestions = result.response.text();
+    const resp = result.response.text();
+    const suggestions = marked(resp);
 
     res.status(200).json({
       suggestions,
