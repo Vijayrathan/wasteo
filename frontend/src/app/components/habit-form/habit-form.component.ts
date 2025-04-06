@@ -8,7 +8,7 @@ import { Router, ActivatedRoute } from "@angular/router";
   styleUrls: ["./habit-form.component.scss"],
 })
 export class HabitFormComponent implements OnInit {
-  habitForm: FormGroup;
+  habitForm!: FormGroup;
   isEditMode: boolean = false;
   habitId: string | null = null;
   loading: boolean = false;
@@ -26,17 +26,16 @@ export class HabitFormComponent implements OnInit {
     private formBuilder: FormBuilder,
     private router: Router,
     private route: ActivatedRoute
-  ) {}
-
-  ngOnInit(): void {
-    // Initialize the form
+  ) {
     this.habitForm = this.formBuilder.group({
       description: ["", [Validators.required]],
       category: ["", [Validators.required]],
       impact: [1, [Validators.required, Validators.min(0)]],
       frequency: ["daily", [Validators.required]],
     });
+  }
 
+  ngOnInit(): void {
     // Check if we're in edit mode
     this.habitId = this.route.snapshot.paramMap.get("id");
     this.isEditMode = !!this.habitId;

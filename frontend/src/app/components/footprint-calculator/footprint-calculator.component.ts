@@ -7,7 +7,7 @@ import { FormBuilder, FormGroup, Validators } from "@angular/forms";
   styleUrls: ["./footprint-calculator.component.scss"],
 })
 export class FootprintCalculatorComponent implements OnInit {
-  calculatorForm: FormGroup;
+  calculatorForm!: FormGroup;
   showResults: boolean = false;
   carbonFootprint: number = 0;
   loading: boolean = false;
@@ -37,9 +37,7 @@ export class FootprintCalculatorComponent implements OnInit {
     },
   };
 
-  constructor(private formBuilder: FormBuilder) {}
-
-  ngOnInit(): void {
+  constructor(private formBuilder: FormBuilder) {
     this.calculatorForm = this.formBuilder.group({
       // Transportation section
       transportation: this.formBuilder.group({
@@ -63,6 +61,10 @@ export class FootprintCalculatorComponent implements OnInit {
         veganMeals: [0, [Validators.required, Validators.min(0)]],
       }),
     });
+  }
+
+  ngOnInit(): void {
+    // Any additional initialization if needed
   }
 
   calculateFootprint(): void {

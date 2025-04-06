@@ -15,9 +15,9 @@ interface ChatMessage {
   styleUrls: ["./chat.component.scss"],
 })
 export class ChatComponent implements OnInit {
-  @ViewChild("chatMessages") chatMessages: ElementRef;
+  @ViewChild('chatMessages') chatMessages!: ElementRef;
 
-  chatForm: FormGroup;
+  chatForm!: FormGroup;
   messages: ChatMessage[] = [];
   loading: boolean = false;
   userName: string = "";
@@ -35,13 +35,13 @@ export class ChatComponent implements OnInit {
     private formBuilder: FormBuilder,
     private userService: UserService,
     private chatService: ChatService
-  ) {}
+  ) {
+    this.chatForm = this.formBuilder.group({
+      message: ['', Validators.required]
+    });
+  }
 
   ngOnInit(): void {
-    this.chatForm = this.formBuilder.group({
-      message: ["", Validators.required],
-    });
-
     const user = this.userService.getCurrentUser();
     if (user) {
       this.userName = user.name;
@@ -85,7 +85,12 @@ export class ChatComponent implements OnInit {
       return;
     }
 
-    const userMessage = this.chatForm.get("message").value;
+    const messageControl = this.chatForm.get("message");
+    if (!messageControl) {
+      return;
+    }
+
+    const userMessage = messageControl.value;
     this.addMessage(userMessage, "user");
     this.chatForm.reset();
 

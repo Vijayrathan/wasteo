@@ -10,30 +10,30 @@
     </div>
 
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-      <!-- Name -->
+      <!-- Username -->
       <div class="mb-3">
-        <label for="name" class="form-label">Full Name</label>
+        <label for="username" class="form-label">Username</label>
         <input
           type="text"
-          id="name"
-          formControlName="name"
+          id="username"
+          formControlName="username"
           class="form-control"
           [ngClass]="{
             'is-invalid':
-              registerForm.get('name')?.touched &&
-              registerForm.get('name')?.invalid
+              registerForm.get('username')?.touched &&
+              registerForm.get('username')?.invalid
           }"
-          placeholder="Enter your full name"
+          placeholder="Choose a username"
         />
         <div
           *ngIf="
-            registerForm.get('name')?.touched &&
-            registerForm.get('name')?.invalid
+            registerForm.get('username')?.touched &&
+            registerForm.get('username')?.invalid
           "
           class="invalid-feedback"
         >
-          <div *ngIf="registerForm.get('name')?.errors?.['required']">
-            Name is required
+          <div *ngIf="registerForm.get('username')?.errors?.['required']">
+            Username is required
           </div>
         </div>
       </div>

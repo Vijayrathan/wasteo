@@ -32,7 +32,6 @@ export class LoginComponent {
 
     this.userService.login(this.loginForm.value).subscribe({
       next: (response) => {
-        this.userService.storeUser(response);
         this.router.navigate(["/dashboard"]);
       },
       error: (error) => {

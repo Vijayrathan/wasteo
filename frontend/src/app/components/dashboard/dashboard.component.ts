@@ -2,7 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { HabitService } from "../../services/habit.service";
 import { UserService } from "../../services/user.service";
 import { AiService } from "../../services/ai.service";
-import { Habit } from "../../models/habit.model";
+import { Habit, HabitCategory } from "../../models/habit.model";
 import { User, UserStats } from "../../models/user.model";
 
 @Component({
@@ -161,14 +161,14 @@ export class DashboardComponent implements OnInit {
 
   // Prepare data for the category chart
   private prepareCategoryChartData(habits: Habit[]): void {
-    const grouped = this.habitService.groupHabitsByCategory(habits);
+    const grouped: Record<HabitCategory, Habit[]> = this.habitService.groupHabitsByCategory(habits);
 
     this.chartData.carbonByCategory.labels = Object.keys(grouped).map((cat) =>
-      this.formatCategoryName(cat)
+      this.formatCategoryName(cat as HabitCategory)
     );
 
     this.chartData.carbonByCategory.datasets[0].data = Object.keys(grouped).map(
-      (cat) => this.habitService.calculateCarbonReduction(grouped[cat])
+      (cat) => this.habitService.calculateCarbonReduction(grouped[cat as HabitCategory])
     );
   }
 

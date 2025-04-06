@@ -9,7 +9,7 @@ import { UserService } from "../../services/user.service";
   styleUrls: ["./register.component.scss"],
 })
 export class RegisterComponent implements OnInit {
-  registerForm: FormGroup;
+  registerForm!: FormGroup;
   errorMessage: string = "";
   loading: boolean = false;
   passwordsMatch: boolean = true;
@@ -22,7 +22,7 @@ export class RegisterComponent implements OnInit {
 
   ngOnInit(): void {
     this.registerForm = this.formBuilder.group({
-      name: ["", [Validators.required]],
+      username: ["", [Validators.required]],
       email: ["", [Validators.required, Validators.email]],
       password: ["", [Validators.required, Validators.minLength(6)]],
       confirmPassword: ["", [Validators.required]],
@@ -53,10 +53,10 @@ export class RegisterComponent implements OnInit {
     this.loading = true;
     this.errorMessage = "";
 
-    const { name, email, password: userPassword } = this.registerForm.value;
+    const { username, email, password: userPassword } = this.registerForm.value;
 
     this.userService
-      .register({ name, email, password: userPassword })
+      .register({ username, email, password: userPassword })
       .subscribe({
         next: () => {
           this.loading = false;
