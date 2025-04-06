@@ -1,93 +1,136 @@
-import { Component, OnInit } from "@angular/core";
-import { Router } from "@angular/router";
-
-interface Habit {
-  _id: string;
-  description: string;
-  category: string;
-  impact: number;
-  frequency: string;
-  isCompleted: boolean;
-  date: Date;
-}
+import { Component, OnInit, OnDestroy } from "@angular/core";
+import { Router, NavigationEnd } from "@angular/router";
+import { HabitService } from "../../services/habit.service";
+import { AuthService } from "../../services/auth.service";
+import { Habit } from "../../models/habit.model";
+import { Subscription, filter } from "rxjs";
 
 @Component({
   selector: "app-habits-list",
   templateUrl: "./habits-list.component.html",
   styleUrls: ["./habits-list.component.scss"],
 })
-export class HabitsListComponent implements OnInit {
+export class HabitsListComponent implements OnInit, OnDestroy {
   habits: Habit[] = [];
   loading: boolean = true;
   categories: string[] = [
-    "Transportation",
-    "Food",
-    "Energy",
-    "Waste",
-    "Water",
-    "Shopping",
+    "transport",
+    "energy",
+    "diet",
+    "waste",
+    "water",
+    "other",
   ];
   selectedCategory: string = "";
   sortBy: string = "date";
   sortOrder: "asc" | "desc" = "desc";
+  private routerSubscription: Subscription = new Subscription();
+  private authSubscription: Subscription = new Subscription();
 
-  // Mock data for demo
-  mockHabits: Habit[] = [
-    {
-      _id: "1",
-      description: "Used public transportation instead of driving",
-      category: "Transportation",
-      impact: 3.2,
-      frequency: "daily",
-      isCompleted: true,
-      date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-    },
-    {
-      _id: "2",
-      description: "Ate a plant-based meal",
-      category: "Food",
-      impact: 2.5,
-      frequency: "daily",
-      isCompleted: true,
-      date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-    },
-    {
-      _id: "3",
-      description: "Used reusable water bottle",
-      category: "Waste",
-      impact: 0.5,
-      frequency: "daily",
-      isCompleted: false,
-      date: new Date(),
-    },
-    {
-      _id: "4",
-      description: "Reduced shower time by 2 minutes",
-      category: "Water",
-      impact: 1.0,
-      frequency: "daily",
-      isCompleted: false,
-      date: new Date(),
-    },
-    {
-      _id: "5",
-      description: "Avoided single-use plastics",
-      category: "Waste",
-      impact: 1.5,
-      frequency: "daily",
-      isCompleted: true,
-      date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-    },
-  ];
+  constructor(
+    private router: Router,
+    private habitService: HabitService,
+    private authService: AuthService
+  ) {
+    // Subscribe to router events to detect when we navigate to this component
+    this.routerSubscription = this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(event => {
+        // Need to cast the event as NavigationEnd after filtering
+        const navEvent = event as NavigationEnd;
+        
+        // Check if we're navigating to the habits list page
+        if (this.isHabitsRoute(navEvent.urlAfterRedirects) || this.isHabitsRoute(navEvent.url)) {
+          console.log('Navigation to habits detected, reloading data');
+          this.loadHabits();
+        }
+      });
+      
+    // Subscribe to auth changes
+    this.authSubscription = this.authService.currentUser$.subscribe(user => {
+      console.log('Auth state changed:', user ? `User ${user._id} logged in` : 'No user');
+      if (this.isHabitsRoute(this.router.url)) {
+        console.log('Currently on habits page, reloading data after auth change');
+        this.loadHabits();
+      }
+    });
+  }
 
-  constructor(private router: Router) {}
+  // Helper method to check if a URL is related to the habits list
+  private isHabitsRoute(url: string): boolean {
+    return url === '/habits' || 
+           url.startsWith('/habits?') ||
+           url === '/habits/' ||
+           url.startsWith('/habits/?');
+  }
 
   ngOnInit(): void {
-    // Simulate API call delay
-    setTimeout(() => {
-      this.habits = this.mockHabits;
+    console.log('HabitsListComponent initialized, current URL:', this.router.url);
+    
+    // Check if we're already on a habits route
+    if (this.isHabitsRoute(this.router.url)) {
+      console.log('Already on habits route, loading habits data');
+    }
+    
+    // Initial load of habits regardless
+    this.loadHabits();
+  }
+
+  ngOnDestroy(): void {
+    // Clean up subscriptions when component is destroyed
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
+    }
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
+    }
+  }
+
+  loadHabits(): void {
+    console.log('Loading habits...');
+    this.loading = true;
+    this.habits = []; // Clear previous habits
+    
+    // Get the current user directly from localStorage for reliability
+    const userStr = localStorage.getItem('currentUser');
+    let currentUser = null;
+    
+    if (userStr) {
+      try {
+        currentUser = JSON.parse(userStr);
+      } catch (e) {
+        console.error('Error parsing user from localStorage:', e);
+      }
+    }
+    
+    // Fallback to AuthService if localStorage doesn't have user
+    if (!currentUser) {
+      currentUser = this.authService.currentUserValue;
+    }
+    
+    if (currentUser && currentUser._id) {
+      console.log('Fetching habits for user:', currentUser._id);
+      this.habitService.getUserHabits(currentUser._id).subscribe({
+        next: (data) => {
+          console.log('Successfully loaded habits data:', data);
+          this.habits = data;
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error fetching habits:', error);
+          this.loading = false;
+          // Display error to user if needed
+        },
+        complete: () => {
+          console.log('Habits request completed');
+        }
+      });
+    } else {
+      console.warn('No user logged in or missing user ID');
+      // If no user is logged in, empty the habits list
+      this.habits = [];
       this.loading = false;
-    }, 1000);
+    }
   }
 
   // Filter habits by category
@@ -110,7 +153,11 @@ export class HabitsListComponent implements OnInit {
           comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
           break;
         case "impact":
-          comparison = a.impact - b.impact;
+        case "carbonFootprint":
+          // Handle both the old impact property and the new carbonFootprint
+          const aImpact = 'impact' in a ? (a as any).impact : a.carbonFootprint;
+          const bImpact = 'impact' in b ? (b as any).impact : b.carbonFootprint;
+          comparison = aImpact - bImpact;
           break;
         case "category":
           comparison = a.category.localeCompare(b.category);
@@ -134,8 +181,36 @@ export class HabitsListComponent implements OnInit {
 
   // Mark habit as completed
   completeHabit(habit: Habit): void {
+    if (!habit._id) return;
+    
+    // Set UI to completed immediately for better UX
     habit.isCompleted = true;
-    // In a real app, this would send the update to the backend
+    
+    // Call the dedicated complete habit endpoint
+    this.habitService.completeHabit(habit._id).subscribe({
+      next: (response) => {
+        console.log('Habit completed successfully:', response);
+        // Update the habit with additional data from response if needed
+        if (response.habit) {
+          // Find the habit in the list and update it with server data
+          const index = this.habits.findIndex(h => h._id === habit._id);
+          if (index >= 0) {
+            this.habits[index] = response.habit;
+          }
+        }
+        
+        // Show a success notification if you have a notification service
+        // this.notificationService.success('Habit completed successfully!');
+      },
+      error: (error) => {
+        console.error('Error completing habit:', error);
+        // Revert UI change if backend update fails
+        habit.isCompleted = false;
+        
+        // Show an error notification if you have a notification service
+        // this.notificationService.error('Failed to complete habit. Please try again.');
+      }
+    });
   }
 
   // Navigate to add new habit
@@ -150,19 +225,26 @@ export class HabitsListComponent implements OnInit {
 
   // Delete a habit
   deleteHabit(habitId: string): void {
-    this.habits = this.habits.filter((h) => h._id !== habitId);
-    // In a real app, this would send the delete request to the backend
+    this.habitService.deleteHabit(habitId).subscribe(
+      () => {
+        this.habits = this.habits.filter((h) => h._id !== habitId);
+        console.log('Habit deleted successfully');
+      },
+      (error) => {
+        console.error('Error deleting habit:', error);
+      }
+    );
   }
 
   // Get CSS class based on habit category
   getCategoryClass(category: string): string {
     const classMap: { [key: string]: string } = {
-      Transportation: "category-transport",
-      Food: "category-food",
-      Energy: "category-energy",
-      Waste: "category-waste",
-      Water: "category-water",
-      Shopping: "category-shopping",
+      transport: "category-transport",
+      energy: "category-energy",
+      diet: "category-food",
+      waste: "category-waste",
+      water: "category-water",
+      other: "category-shopping",
     };
 
     return classMap[category] || "";

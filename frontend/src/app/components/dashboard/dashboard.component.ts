@@ -4,6 +4,7 @@ import { UserService } from "../../services/user.service";
 import { AiService } from "../../services/ai.service";
 import { Habit, HabitCategory } from "../../models/habit.model";
 import { User, UserStats } from "../../models/user.model";
+import { Router } from "@angular/router";
 
 @Component({
   selector: "app-dashboard",
@@ -104,7 +105,8 @@ export class DashboardComponent implements OnInit {
   constructor(
     private habitService: HabitService,
     private userService: UserService,
-    private aiService: AiService
+    private aiService: AiService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -238,5 +240,10 @@ export class DashboardComponent implements OnInit {
     this.ecoChallengesCompleted = 12;
     this.carbonSaved = 127;
     this.streakDays = 8;
+  }
+
+  // Navigate to a specific route
+  navigateTo(route: string): void {
+    this.router.navigate([route]);
   }
 }

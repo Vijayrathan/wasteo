@@ -19,6 +19,7 @@ import { AuthService } from './services/auth.service';
 
 // Import auth interceptor
 import { AuthInterceptor } from "./interceptors/auth.interceptor";
+import { MarkdownPipe } from './markdown.pipe';
 
 @NgModule({
   declarations: [
@@ -31,6 +32,7 @@ import { AuthInterceptor } from "./interceptors/auth.interceptor";
     HabitsListComponent,
     HabitFormComponent,
     FootprintCalculatorComponent,
+    MarkdownPipe,
   ],
   imports: [
     BrowserModule,

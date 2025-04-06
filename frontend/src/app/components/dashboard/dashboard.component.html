@@ -97,13 +97,13 @@
       <div class="quick-actions">
         <h3>Quick Actions</h3>
         <div class="action-buttons">
-          <button class="btn btn-primary">
+          <button class="btn btn-primary" (click)="navigateTo('/habits/new')">
             <i class="fas fa-plus"></i> Add New Habit
           </button>
-          <button class="btn btn-outline-primary">
+          <button class="btn btn-outline-primary" (click)="navigateTo('/calculator')">
             <i class="fas fa-calculator"></i> Calculate Footprint
           </button>
-          <button class="btn btn-outline-primary">
+          <button class="btn btn-outline-primary" (click)="navigateTo('/chat')">
             <i class="fas fa-comment"></i> Chat with EcoWise AI
           </button>
         </div>

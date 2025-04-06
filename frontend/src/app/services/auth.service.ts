@@ -12,14 +12,36 @@ export class AuthService {
 
   constructor(private http: HttpClient) {
     // Initialize with stored user data if available
+    this.refreshUserFromStorage();
+    
+    // Listen for storage events to sync across tabs
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'currentUser') {
+        this.refreshUserFromStorage();
+      }
+    });
+  }
+  
+  private refreshUserFromStorage(): void {
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser) {
       this.currentUserSubject.next(JSON.parse(storedUser));
+    } else {
+      this.currentUserSubject.next(null);
     }
   }
 
   public get currentUserValue() {
-    return this.currentUserSubject.value;
+    // Always get the latest user from storage
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      try {
+        return JSON.parse(storedUser);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
   }
 
   login(email: string, password: string): Observable<any> {
@@ -29,6 +51,7 @@ export class AuthService {
   logout() {
     localStorage.removeItem('currentUser');
     this.currentUserSubject.next(null);
+    console.log('AuthService: User logged out');
   }
 
   // For development/testing purposes, set a mock user
